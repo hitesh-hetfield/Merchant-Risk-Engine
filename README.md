@@ -101,15 +101,18 @@ POST /predict-churn
   "AvgTx90": 400,
   "Recency": 12
 }
+```
+
 
 ### Sample Response
+```json
 {
   "churn_probability": 0.403,
   "churn_flag": 0,
   "risk_bucket": "MEDIUM",
   "recommended_action": "Monitor usage"
 }
-
+```
 --- 
 
 ## Tech Stack
