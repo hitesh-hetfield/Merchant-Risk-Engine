@@ -126,14 +126,20 @@ POST /predict-churn
 --- 
 
 ## How to Run Locally
-1. Install Dependencies 
-$ pip install -r requirements.txt
+### 1. Install Dependencies 
+```bash
+pip install -r requirements.txt
+```
 
-2. Start the API
-$ uvicorn app:app --reload
+### 2. Start the API
+```bash
+uvicorn app:app --reload
+```
 
-3. Open Swagger UI
-$ http://127.0.0.1:8000/docs
+### 3. Open Swagger UI
+```bash
+http://127.0.0.1:8000/docs
+```
 
 --- 
 
