@@ -2,14 +2,49 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 import pandas as pd
 import joblib
+import os
+import boto3
+from pathlib import Path
 
-MODEL_PATH = "artifacts/churn_model.pkl"
-FEATURE_PATH = "artifacts/feature_names.pkl"
+def load_model_from_s3(bucket_name, model_key, local_path):
+    s3 = boto3.client(
+        "s3",
+        aws_access_key_id = os.getenv("AWS_ACCESS_KEY_ID"),
+        aws_secret_access_key = os.getenv("AWS_SECRET_ACCESS_KEY"),
+        region_name = os.getenv("AWS_REGION")
+    )
 
-churn_model = joblib.load(MODEL_PATH)
-feature_names = joblib.load(FEATURE_PATH)
+    s3.download_file(bucket_name, model_key, local_path)
 
-app = FastAPI(title="Merchant Churn Prediction API")
+# MODEL_PATH = "artifacts/churn_model.pkl"
+# FEATURE_PATH = "artifacts/feature_names.pkl"
+
+# churn_model = joblib.load(MODEL_PATH)
+# feature_names = joblib.load(FEATURE_PATH)
+
+app = FastAPI(title="Merchant Risk Engine")
+
+BASE_DIR = Path(__file__).resolve().parent
+ARTIFACTS_DIR = BASE_DIR / "artifacts"
+ARTIFACTS_DIR.mkdir(exist_ok=True)
+
+BUKCET_NAME = "merchant-risk-engine-models"
+
+MODEL_KEY = "models/churn_model.pkl"
+FEATURE_KEY = "models/feature_names.pkl"
+
+MODEL_PATH = ARTIFACTS_DIR / "churn_model.pkl"
+FEATURE_PATH = ARTIFACTS_DIR / "feature_names.pkl"
+
+@app.on_event("startup")
+def load_artifacts():
+
+    load_model_from_s3(BUKCET_NAME, MODEL_KEY, MODEL_PATH)
+    load_model_from_s3(BUKCET_NAME, FEATURE_KEY, FEATURE_PATH)
+
+    global churn_model, feature_names
+    churn_model = joblib.load(MODEL_PATH)
+    feature_names = joblib.load(FEATURE_PATH)
 
 @app.get("/")
 def health_check():
